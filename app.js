@@ -29,18 +29,16 @@
     var onMouseDown = function(e) {
         var elementId = (e.target || e.srcElement).id;
         var el = document.querySelector('#'+elementId)
+        dropZoneView.el = el
         dropZoneView.mousedown = true; 
-        // dropZoneView.x = el.offsetLeft - e.clientX; 
-        // dropZoneView.y = el.offsetTop - e.clientY; 
-
-        // console.log('mouse down', dropZoneView.x, dropZoneView.y )
-        debugger
-        console.log("x: "+el.offsetLeft+", y: "+el.offsetTop+" x': "+e.clientX+" y': "+e.clientY)
+        dropZoneView.x = (dropZoneElement.offsetLeft + el.offsetLeft) - e.clientX; 
+        dropZoneView.y = el.offsetTop - e.clientY;
     };
 
     var onMouseMove = function(e) {
         if(dropZoneView.mousedown) {
-            console.log('Hello')
+            dropZoneView.el.style.left = (e.clientX - dropZoneElement.offsetLeft)  + dropZoneView.x + 'px'; 
+            dropZoneView.el.style.top = e.clientY + dropZoneView.y + 'px'; 
         }
     };
 
