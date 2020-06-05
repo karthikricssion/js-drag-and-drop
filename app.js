@@ -4,17 +4,18 @@
     var dropZoneView = {
         width: dropZoneElement.clientWidth,
         height: dropZoneElement.clientHeight,
-        el: '',
-        mousedown: false,
-        x: 0,
-        y: 0
+        selectedItem: {
+            el: '',
+            mousedown: false,
+            x: 0,
+            y: 0
+        }
     }
-    var itemMouseDown = false
 
     var getRandomIntInclusive = function(min, max) {
         min = Math.ceil(min);
         max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive 
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     };
 
     var generateItemBoxObj = function() {
@@ -27,23 +28,36 @@
 
     
     var onMouseDown = function(e) {
-        var elementId = (e.target || e.srcElement).id;
-        var el = document.querySelector('#'+elementId)
-        dropZoneView.el = el
-        dropZoneView.mousedown = true; 
-        dropZoneView.x = (dropZoneElement.offsetLeft + el.offsetLeft) - e.clientX; 
-        dropZoneView.y = el.offsetTop - e.clientY;
+        let elementId = (e.target || e.srcElement).id;
+        let el = document.querySelector('#'+elementId)
+
+        dropZoneView.selectedItem.el = el
+        dropZoneView.selectedItem.mousedown = true; 
+        dropZoneView.selectedItem.x = (dropZoneElement.offsetLeft + el.offsetLeft) - e.clientX; 
+        dropZoneView.selectedItem.y = el.offsetTop - e.clientY;
     };
 
     var onMouseMove = function(e) {
-        if(dropZoneView.mousedown) {
-            dropZoneView.el.style.left = (e.clientX - dropZoneElement.offsetLeft)  + dropZoneView.x + 'px'; 
-            dropZoneView.el.style.top = e.clientY + dropZoneView.y + 'px'; 
+        if(dropZoneView.selectedItem.mousedown) {
+            let selectedItem = dropZoneView.selectedItem.el
+            let ItemWidth = selectedItem.clientWidth
+            let ItemHeight = selectedItem.clientHeight
+            let ItemLeftPos = (e.clientX - dropZoneElement.offsetLeft)  + dropZoneView.selectedItem.x
+            let ItemTopPos = e.clientY + dropZoneView.selectedItem.y
+            
+            // check whether the item box is not 
+            // going out of dropzone
+            if((ItemLeftPos >= 0 && (ItemLeftPos + ItemWidth) <= dropZoneView.width) 
+                && ( ItemTopPos >= 0 && (ItemTopPos + ItemHeight) <= dropZoneView.height)
+            ) {
+                selectedItem.style.left = ItemLeftPos + 'px'; 
+                selectedItem.style.top =  ItemTopPos + 'px'; 
+            }
         }
     };
 
     var onMouseUp = function(e) {
-        dropZoneView.mousedown = false
+        dropZoneView.selectedItem.mousedown = false
     };
 
     var addInitialItemsToDropZoneByLength = function(len) {
