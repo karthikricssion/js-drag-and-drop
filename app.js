@@ -30,6 +30,10 @@
     var onMouseDown = function(e) {
         let elementId = (e.target || e.srcElement).id;
         let el = document.querySelector('#'+elementId)
+        // let getItems = document.querySelectorAll('.item')
+        // getItems.forEach((e) => {
+        //     e.classList.add('no-select') 
+        // })
 
         dropZoneView.selectedItem.el = el
         dropZoneView.selectedItem.mousedown = true; 
@@ -40,17 +44,18 @@
     var onMouseMove = function(e) {
         if(dropZoneView.selectedItem.mousedown) {
             let selectedItem = dropZoneView.selectedItem.el
-            let ItemWidth = selectedItem.clientWidth
+            let ItemWidth = selectedItem.clientWidth 
             let ItemHeight = selectedItem.clientHeight
             let ItemLeftPos = (e.clientX - dropZoneElement.offsetLeft)  + dropZoneView.selectedItem.x
             let ItemTopPos = e.clientY + dropZoneView.selectedItem.y
             
             // check whether the item box is not 
             // going out of dropzone
-            if((ItemLeftPos >= 0 && (ItemLeftPos + ItemWidth) <= dropZoneView.width) 
-                && ( ItemTopPos >= 0 && (ItemTopPos + ItemHeight) <= dropZoneView.height)
-            ) {
+            if(ItemLeftPos >= 0 && (ItemLeftPos + ItemWidth) <= dropZoneView.width) {
                 selectedItem.style.left = ItemLeftPos + 'px'; 
+            }
+
+            if( ItemTopPos >= 0 && (ItemTopPos + ItemHeight) <= dropZoneView.height) {
                 selectedItem.style.top =  ItemTopPos + 'px'; 
             }
         }
@@ -76,6 +81,7 @@
                 divElement.addEventListener('mousedown', onMouseDown)
                 dropZoneElement.addEventListener('mousemove', onMouseMove)
                 divElement.addEventListener('mouseup', onMouseUp)
+                divElement.addEventListener('mouseout', onMouseUp)
 
                 dropZoneElement.appendChild(divElement)
             }

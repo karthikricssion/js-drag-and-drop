@@ -30,4 +30,9 @@ html, body {
     position: absolute;
     border: 1px solid #000;
     text-align: center;
+    user-select: none;
+}
+
+.play-area .item.no-select {
+    user-select: none;
 }
