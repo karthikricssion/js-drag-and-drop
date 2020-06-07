@@ -9,6 +9,14 @@
 
 Here is the [Demo link ](https://laughing-edison-270381.netlify.app/)
 
+## Version Two:
+![version one](./version-two/assets/version-one.png)
+- Improved UI
+- Rendering drop items using data
+
+[Demo](https://sharp-lewin-7964ae.netlify.app/)
+
+
 ## References
 [Draggable Ref](https://glitch.com/edit/#!/frosted-deeply-tango?path=script.js%3A47%3A2) \
 [Moving div around, Ref](https://www.tnado.com/blog/javascript-move-div-with-the-mouse/?cookie=accept) \
