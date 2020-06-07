@@ -10,7 +10,7 @@
 Here is the [Demo link ](https://laughing-edison-270381.netlify.app/)
 
 ## Version Two:
-![version one](./version-two/assets/version-one.png)
+![version one](./versionTwo/assets/version-one.png)
 - Improved UI
 - Rendering drop items using data
 
