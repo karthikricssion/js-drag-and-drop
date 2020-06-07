@@ -17,25 +17,33 @@
         }
     ]
 
+    var dropItemMeasurement = {
+        width: 234,
+        height: 45
+    }
     var droppedItems = []
     var dropZoneElement = document.querySelector('#dropZone')
 
     var onDragStart = function(e) {
-        // this.classList.add('on-drag-start')
-        // event.dataTransfer.setDragImage(this, e.clientX, e.clientY);
+        var selectedDivBoundingBox = this.getBoundingClientRect()
+        e.dataTransfer.setData('text/plain', JSON.stringify({
+            type: this.getAttribute('data-type'),
+            mousePosition: {
+                y: (selectedDivBoundingBox.height - ((selectedDivBoundingBox.top + selectedDivBoundingBox.height) - e.clientY)),
+                x: (selectedDivBoundingBox.width -  ((selectedDivBoundingBox.left + selectedDivBoundingBox.width ) - e.clientX))
+            }
+        }));
 
-        e.dataTransfer.setData('text/plain', this.getAttribute('data-type'));
-        
         // console.log(
-        //     'width:' + this.offsetWidth + ', Height:' + this.offsetHeight, 
         //     'page: ' + e.pageX + ',' + e.pageY,
         //     'client: ' + e.clientX + ',' + e.clientY,
-        //     'screen: ' + e.screenX + ',' + e.screenY)
-    }
+        //     'screen: ' + e.screenX + ',' + e.screenY
+        // )
+    };
 
     var onDragEnd = function(e) {
         // this.classList.remove('on-drag-start')
-    }
+    };
 
     var createFormElements = function() {
         let formElementDiv = document.querySelector('#formElements')
@@ -68,7 +76,7 @@
 
     var getFormElementByType = function(type) {
         return formElements.find((item => item.type === type))
-    }
+    };
 
     var itemChildTempate = function(type) {
         var childEle;
@@ -84,30 +92,67 @@
         }
 
         return childEle
-    }
+    };
 
-    var itemTemplate = function(id, type, pos) {
-        var droppedItem = getFormElementByType(type)
+    var positionDropedItem = function(itemEle, itemPos, droppedBoxPos, droppedItem) {
+        var xPosition = (droppedBoxPos.x - itemPos.x)
+        var yPosition = (droppedBoxPos.y - itemPos.y )
+
+        if(xPosition < 0) {
+            xPosition = 8
+        } else if((xPosition + dropItemMeasurement.width) > droppedBoxPos.width) {
+            xPosition = droppedBoxPos.width - dropItemMeasurement.width - 8
+        }
+
+        if(yPosition < 0) {
+            yPosition = 8
+        } else if((yPosition + dropItemMeasurement.height) > droppedBoxPos.height) {
+            yPosition = droppedBoxPos.height - dropItemMeasurement.height - 8
+        }
+
+        itemEle.style.left = xPosition + 'px'
+        itemEle.style.top =  yPosition + 'px'
+
+
+        droppedItem['pos'] = {
+            x: xPosition,
+            y: yPosition
+        }
+
+        droppedItems.push(droppedItem)
+        
+        console.log(droppedItems)
+
+        return itemEle
+    };
+
+    var itemTemplate = function(id, data, pos) {
+        var selectedItemData = JSON.parse(data)
+        var droppedItem = getFormElementByType(selectedItemData.type)
         droppedItem['id'] = 'item'+id
 
         var itemEle = document.createElement('div')
         itemEle.classList.add('form-item')
         itemEle.id = 'item'+id
-
-
-        itemEle.appendChild(itemChildTempate(type))
-        droppedItems.push(droppedItem)
-        
-        return itemEle
-    }
+    
+        itemEle.appendChild(itemChildTempate(selectedItemData.type))
+    
+        return positionDropedItem(itemEle, selectedItemData.mousePosition, pos, droppedItem)
+    };
 
     var getDropPosition = function($this, e) {
-        console.log($this.offsetLeft, e.clientX)
-    }
+        return {
+            x: e.clientX - $this.offsetLeft, 
+            y: e.clientY - $this.offsetTop,
+            width: $this.offsetWidth,
+            height: $this.offsetHeight,
+            left: $this.offsetLeft,
+            top: $this.offsetTop
+        }
+    };
     
     dropZoneElement.addEventListener('drop', function(e) {
         e.preventDefault();
-        debugger
 
         this.appendChild(itemTemplate(droppedItems.length + 1, e.dataTransfer.getData('text'), getDropPosition(this, e)))
         e.dataTransfer.clearData();

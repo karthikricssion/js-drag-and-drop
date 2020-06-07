@@ -43,7 +43,7 @@ html, body {
     padding: 8px;
     background-color: #fff;
     border-bottom: 1px solid #c5c5c5;
-    cursor: grab;
+    /* cursor: grab; */
 }
 
 /* .elements ul li.on-drag-start {
@@ -87,13 +87,17 @@ html, body {
 /* Drop Item */
 .form-item {
     display: inline-block;
-    padding: 8px;
+    padding: 11px;
     border: 1px solid #be9fd2;
     border-radius: 3px;
-    margin: 8px;
     user-select: none;
-    min-width: 151px;
-    /* text-align: center; */
+    min-width: 210px;
+    background-color: #f9f0ff;
+}
+
+.form-item input[type='text'] {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .play-area.absolute-pos .form-item {

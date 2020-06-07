@@ -23,6 +23,9 @@ Here is the [Demo link ](https://laughing-edison-270381.netlify.app/)
 [About cordinates](https://javascript.info/size-and-scroll#geometry) \
 [Form Builder Ref](https://formbuilder.online/) 
 
+## Mouse move 
+[Example 1](https://jsfiddle.net/bw4yK/3/)
+
 ## DND 
 [Basics](https://www.html5rocks.com/en/tutorials/dnd/basics/) \
 [Example 1](https://codepen.io/tieppt/pen/GZPVjx?editors=1010) \
