@@ -24,6 +24,13 @@
     var droppedItems = JSON.parse(window.localStorage.getItem('droppedItems')) || [];
     var dropZoneElement = document.querySelector('#dropZone')
 
+    var uuidv4 = function() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
     var onDragStart = function(e) {
         var selectedDivBoundingBox = this.getBoundingClientRect()
         e.dataTransfer.setData('text/plain', JSON.stringify({
@@ -74,7 +81,9 @@
     };
 
     var getItemById = function(id) {
-        return droppedItems.find((item => item.id === id))
+        return droppedItems.find((item => {
+            return item.id === id
+        }))
     }
 
     var updateItem = function(data) {
@@ -84,7 +93,7 @@
                 return item
             }
 
-            return item
+            return droppedItems
         })
     }
 
@@ -156,16 +165,18 @@
         this.style.opacity = 1
     }
 
-    var itemTemplate = function(id, data, pos) {
+    var itemTemplate = function(data, pos) {
         var selectedItemData = JSON.parse(data)
         if(selectedItemData.isNew) {
+            var id = uuidv4()
             var droppedItem = getFormElementByType(selectedItemData.type)
-            droppedItem['id'] = 'item'+id
+            droppedItem = JSON.parse(JSON.stringify(droppedItem))
+            droppedItem['id'] = 'item-'+id
 
             var itemEle = document.createElement('div')
             itemEle.draggable = true
             itemEle.classList.add('form-item')
-            itemEle.id = 'item'+id
+            itemEle.id = 'item-'+id
 
             itemEle.addEventListener('dragstart', onDropZoneItemDragStart)
             itemEle.addEventListener('dragend', onDropZoneItemDragEnd)
@@ -173,9 +184,8 @@
             itemEle.appendChild(itemChildTempate(selectedItemData.type))
             return positionDropedItem(selectedItemData.isNew, itemEle, selectedItemData.mousePosition, pos, droppedItem)
         } else {
-            var dragEle = document.querySelector('#'+selectedItemData.type)
+            var dragEle = document.querySelector('#'+selectedItemData.type)            
             var dragEleData = getItemById(selectedItemData.type)
-
             return positionDropedItem(selectedItemData.isNew, dragEle, selectedItemData.mousePosition, pos, dragEleData)
         }
     };
@@ -194,7 +204,7 @@
     dropZoneElement.addEventListener('drop', function(e) {
         e.preventDefault();
 
-        this.appendChild(itemTemplate(droppedItems.length + 1, e.dataTransfer.getData('text'), getDropPosition(this, e)))
+        this.appendChild(itemTemplate(e.dataTransfer.getData('text'), getDropPosition(this, e)))
         e.dataTransfer.clearData();
     });
 
