@@ -21,7 +21,7 @@
         width: 234,
         height: 45
     }
-    var droppedItems = []
+    var droppedItems = JSON.parse(window.localStorage.getItem('droppedItems')) || [];
     var dropZoneElement = document.querySelector('#dropZone')
 
     var onDragStart = function(e) {
@@ -34,12 +34,6 @@
                 x: (selectedDivBoundingBox.width -  ((selectedDivBoundingBox.left + selectedDivBoundingBox.width ) - e.clientX))
             }
         }));
-
-        // console.log(
-        //     'page: ' + e.pageX + ',' + e.pageY,
-        //     'client: ' + e.clientX + ',' + e.clientY,
-        //     'screen: ' + e.screenX + ',' + e.screenY
-        // )
     };
 
     var onDragEnd = function(e) {
@@ -83,6 +77,17 @@
         return droppedItems.find((item => item.id === id))
     }
 
+    var updateItem = function(data) {
+        droppedItems.map((item) => {
+            if(item.id === data.id) {
+                item = data
+                return item
+            }
+
+            return item
+        })
+    }
+
     var itemChildTempate = function(type) {
         var childEle;
         if(type === 'text') {
@@ -99,7 +104,7 @@
         return childEle
     };
 
-    var positionDropedItem = function(itemEle, itemPos, droppedBoxPos, droppedItem) {
+    var positionDropedItem = function(isNew, itemEle, itemPos, droppedBoxPos, droppedItem) {
         var xPosition = (droppedBoxPos.x - itemPos.x)
         var yPosition = (droppedBoxPos.y - itemPos.y )
 
@@ -123,11 +128,19 @@
             y: yPosition
         }
 
-        droppedItems.push(droppedItem)
+        if(isNew) {
+            droppedItems.push(droppedItem)
+        } else {
+            updateItem(droppedItem)
+        }
+
+        window.localStorage.setItem('droppedItems', JSON.stringify(droppedItems));
+        
         return itemEle
     };
 
     var onDropZoneItemDragStart = function(e) {
+        this.style.opacity = 0.2
         var selectedDivBoundingBox = this.getBoundingClientRect()
         e.dataTransfer.setData('text/plain', JSON.stringify({
             isNew: false,
@@ -140,7 +153,7 @@
     };
 
     var onDropZoneItemDragEnd = function(e) {
-        console.log(e)
+        this.style.opacity = 1
     }
 
     var itemTemplate = function(id, data, pos) {
@@ -158,12 +171,12 @@
             itemEle.addEventListener('dragend', onDropZoneItemDragEnd)
 
             itemEle.appendChild(itemChildTempate(selectedItemData.type))
-            return positionDropedItem(itemEle, selectedItemData.mousePosition, pos, droppedItem)
+            return positionDropedItem(selectedItemData.isNew, itemEle, selectedItemData.mousePosition, pos, droppedItem)
         } else {
             var dragEle = document.querySelector('#'+selectedItemData.type)
             var dragEleData = getItemById(selectedItemData.type)
 
-            return positionDropedItem(dragEle, selectedItemData.mousePosition, pos, dragEleData)
+            return positionDropedItem(selectedItemData.isNew, dragEle, selectedItemData.mousePosition, pos, dragEleData)
         }
     };
 
@@ -200,5 +213,27 @@
         // console.log('drop over')
     });
 
+    var checkAndCreatDropItemFromLocalStorge = function() {
+        if(droppedItems.length) {
+            droppedItems.forEach((item) => {
+                var itemEle = document.createElement('div')
+                itemEle.draggable = true
+                itemEle.classList.add('form-item')
+                itemEle.id = item.id
+
+                itemEle.style.left = item.pos.x + 'px'
+                itemEle.style.top =  item.pos.y + 'px'
+
+                itemEle.addEventListener('dragstart', onDropZoneItemDragStart)
+                itemEle.addEventListener('dragend', onDropZoneItemDragEnd)
+
+                itemEle.appendChild(itemChildTempate(item.type))
+
+                dropZoneElement.appendChild(itemEle)
+            })
+        }
+    }
+
+    checkAndCreatDropItemFromLocalStorge()
     createFormElements()
 })()
