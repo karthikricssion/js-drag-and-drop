@@ -27,6 +27,7 @@
     var onDragStart = function(e) {
         var selectedDivBoundingBox = this.getBoundingClientRect()
         e.dataTransfer.setData('text/plain', JSON.stringify({
+            isNew: true,
             type: this.getAttribute('data-type'),
             mousePosition: {
                 y: (selectedDivBoundingBox.height - ((selectedDivBoundingBox.top + selectedDivBoundingBox.height) - e.clientY)),
@@ -78,6 +79,10 @@
         return formElements.find((item => item.type === type))
     };
 
+    var getItemById = function(id) {
+        return droppedItems.find((item => item.id === id))
+    }
+
     var itemChildTempate = function(type) {
         var childEle;
         if(type === 'text') {
@@ -113,31 +118,53 @@
         itemEle.style.left = xPosition + 'px'
         itemEle.style.top =  yPosition + 'px'
 
-
         droppedItem['pos'] = {
             x: xPosition,
             y: yPosition
         }
 
         droppedItems.push(droppedItem)
-        
-        console.log(droppedItems)
-
         return itemEle
     };
 
+    var onDropZoneItemDragStart = function(e) {
+        var selectedDivBoundingBox = this.getBoundingClientRect()
+        e.dataTransfer.setData('text/plain', JSON.stringify({
+            isNew: false,
+            type: this.getAttribute('id'),
+            mousePosition: {
+                y: (selectedDivBoundingBox.height - ((selectedDivBoundingBox.top + selectedDivBoundingBox.height) - e.clientY)),
+                x: (selectedDivBoundingBox.width -  ((selectedDivBoundingBox.left + selectedDivBoundingBox.width ) - e.clientX))
+            }
+        }));
+    };
+
+    var onDropZoneItemDragEnd = function(e) {
+        console.log(e)
+    }
+
     var itemTemplate = function(id, data, pos) {
         var selectedItemData = JSON.parse(data)
-        var droppedItem = getFormElementByType(selectedItemData.type)
-        droppedItem['id'] = 'item'+id
+        if(selectedItemData.isNew) {
+            var droppedItem = getFormElementByType(selectedItemData.type)
+            droppedItem['id'] = 'item'+id
 
-        var itemEle = document.createElement('div')
-        itemEle.classList.add('form-item')
-        itemEle.id = 'item'+id
-    
-        itemEle.appendChild(itemChildTempate(selectedItemData.type))
-    
-        return positionDropedItem(itemEle, selectedItemData.mousePosition, pos, droppedItem)
+            var itemEle = document.createElement('div')
+            itemEle.draggable = true
+            itemEle.classList.add('form-item')
+            itemEle.id = 'item'+id
+
+            itemEle.addEventListener('dragstart', onDropZoneItemDragStart)
+            itemEle.addEventListener('dragend', onDropZoneItemDragEnd)
+
+            itemEle.appendChild(itemChildTempate(selectedItemData.type))
+            return positionDropedItem(itemEle, selectedItemData.mousePosition, pos, droppedItem)
+        } else {
+            var dragEle = document.querySelector('#'+selectedItemData.type)
+            var dragEleData = getItemById(selectedItemData.type)
+
+            return positionDropedItem(dragEle, selectedItemData.mousePosition, pos, dragEleData)
+        }
     };
 
     var getDropPosition = function($this, e) {
