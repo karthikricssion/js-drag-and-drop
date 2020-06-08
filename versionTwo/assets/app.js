@@ -207,7 +207,7 @@
         // console.log('drop over')
     });
 
-    var checkAndCreatDropItemFromLocalStorge = function() {
+    var renderDroppedItems = function() {
         if(droppedItems.length) {
             droppedItems.forEach((item) => {
                 var itemEle = document.createElement('div')
@@ -228,6 +228,6 @@
         }
     }
 
-    checkAndCreatDropItemFromLocalStorge()
+    renderDroppedItems()
     createFormElements()
 })()
