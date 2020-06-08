@@ -24,11 +24,8 @@
     var droppedItems = JSON.parse(window.localStorage.getItem('droppedItems')) || [];
     var dropZoneElement = document.querySelector('#dropZone')
 
-    var uuidv4 = function() {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
+    var generateUniqueId = function() {
+        return Math.ceil(Math.random() * 10000000)
     }
 
     var onDragStart = function(e) {
@@ -49,12 +46,12 @@
 
     var createFormElements = function() {
         let formElementDiv = document.querySelector('#formElements')
-        let createListHolderElement = document.createElement('ul')
-        createListHolderElement.classList.add('form-control-box')
+        let listHolderElement = document.createElement('ul')
+        listHolderElement.classList.add('form-control-box')
 
         formElements.forEach((item) => {
-            let createListElement = document.createElement('li')
-            createListElement.setAttribute("data-type", item.type);
+            let listElement = document.createElement('li')
+            listElement.setAttribute("data-type", item.type);
 
             let createImageElement = document.createElement('img')
             createImageElement.classList.add('img-responsive')
@@ -63,17 +60,17 @@
             let createSpanElement = document.createElement('span')
             createSpanElement.innerText = item.label
 
-            createListElement.draggable = true
+            listElement.draggable = true
 
-            createListElement.addEventListener('dragstart', onDragStart)
-            createListElement.addEventListener('dragend', onDragEnd)
+            listElement.addEventListener('dragstart', onDragStart)
+            listElement.addEventListener('dragend', onDragEnd)
 
-            createListElement.appendChild(createImageElement)
-            createListElement.appendChild(createSpanElement)
-            createListHolderElement.appendChild(createListElement)
+            listElement.appendChild(createImageElement)
+            listElement.appendChild(createSpanElement)
+            listHolderElement.appendChild(listElement)
         })
 
-        formElementDiv.appendChild(createListHolderElement)
+        formElementDiv.appendChild(listHolderElement)
     };
 
     var getFormElementByType = function(type) {
@@ -86,18 +83,7 @@
         }))
     }
 
-    var updateItem = function(data) {
-        droppedItems.map((item) => {
-            if(item.id === data.id) {
-                item = data
-                return item
-            }
-
-            return droppedItems
-        })
-    }
-
-    var itemChildTempate = function(type) {
+    var getElementByType = function(type) {
         var childEle;
         if(type === 'text') {
             childEle = document.createElement('label')
@@ -113,7 +99,7 @@
         return childEle
     };
 
-    var positionDropedItem = function(isNew, itemEle, itemPos, droppedBoxPos, droppedItem) {
+    var positionDroppedItem = function(isNew, itemEle, itemPos, droppedBoxPos, droppedItem) {
         var xPosition = (droppedBoxPos.x - itemPos.x)
         var yPosition = (droppedBoxPos.y - itemPos.y )
 
@@ -139,8 +125,6 @@
 
         if(isNew) {
             droppedItems.push(droppedItem)
-        } else {
-            updateItem(droppedItem)
         }
 
         window.localStorage.setItem('droppedItems', JSON.stringify(droppedItems));
@@ -165,10 +149,10 @@
         this.style.opacity = 1
     }
 
-    var itemTemplate = function(data, pos) {
+    var setDroppedItemTemplate = function(data, pos) {
         var selectedItemData = JSON.parse(data)
         if(selectedItemData.isNew) {
-            var id = uuidv4()
+            var id = generateUniqueId()
             var droppedItem = getFormElementByType(selectedItemData.type)
             droppedItem = JSON.parse(JSON.stringify(droppedItem))
             droppedItem['id'] = 'item-'+id
@@ -181,12 +165,12 @@
             itemEle.addEventListener('dragstart', onDropZoneItemDragStart)
             itemEle.addEventListener('dragend', onDropZoneItemDragEnd)
 
-            itemEle.appendChild(itemChildTempate(selectedItemData.type))
-            return positionDropedItem(selectedItemData.isNew, itemEle, selectedItemData.mousePosition, pos, droppedItem)
+            itemEle.appendChild(getElementByType(selectedItemData.type))
+            return positionDroppedItem(selectedItemData.isNew, itemEle, selectedItemData.mousePosition, pos, droppedItem)
         } else {
             var dragEle = document.querySelector('#'+selectedItemData.type)            
             var dragEleData = getItemById(selectedItemData.type)
-            return positionDropedItem(selectedItemData.isNew, dragEle, selectedItemData.mousePosition, pos, dragEleData)
+            return positionDroppedItem(selectedItemData.isNew, dragEle, selectedItemData.mousePosition, pos, dragEleData)
         }
     };
 
@@ -204,7 +188,7 @@
     dropZoneElement.addEventListener('drop', function(e) {
         e.preventDefault();
 
-        this.appendChild(itemTemplate(e.dataTransfer.getData('text'), getDropPosition(this, e)))
+        this.appendChild(setDroppedItemTemplate(e.dataTransfer.getData('text'), getDropPosition(this, e)))
         e.dataTransfer.clearData();
     });
 
@@ -237,7 +221,7 @@
                 itemEle.addEventListener('dragstart', onDropZoneItemDragStart)
                 itemEle.addEventListener('dragend', onDropZoneItemDragEnd)
 
-                itemEle.appendChild(itemChildTempate(item.type))
+                itemEle.appendChild(getElementByType(item.type))
 
                 dropZoneElement.appendChild(itemEle)
             })
